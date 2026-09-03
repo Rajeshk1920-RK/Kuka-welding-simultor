@@ -1,4 +1,21 @@
-@charset "UTF-8";
+<!DOCTYPE html>
+<html lang="en"><head>
+    <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff5500'&gt;&lt;path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/&gt;&lt;/svg&gt;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUKA Industrial Robotic Weld Cell | 3D Digital Twin</title>
+    <!-- Google Fonts: Outfit, Inter, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Outfit:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style type="text/css" data-vite-dev-id="/Users/manojsarya/Documents/ATS_Projects/Kuka-welding-simultor/src/index.css">@charset "UTF-8";
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -15,12 +32,6 @@
   
   --border-subtle: #e2e8f0;
   --border-strong: #cbd5e1;
-  --kuka-orange-glow: rgba(249, 115, 22, 0.25);
-  --accent-cyan: #0284c7;
-  --accent-blue: #0284c7;
-  --accent-emerald: #16a34a;
-  --accent-rose: #dc2626;
-  --accent-amber: #d97706;
   
   --text-main: #0f172a;
   --text-body: #334155;
@@ -571,11 +582,10 @@ html, body {
 }
 
 .joint-card {
-  background: var(--bg-surface);
+  background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 8px 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .joint-card-top {
@@ -588,35 +598,26 @@ html, body {
 .joint-title-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .joint-axis-tag {
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
   color: var(--kuka-orange);
   font-family: var(--font-mono);
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  padding: 1px 6px;
-  border-radius: 4px;
 }
 
 .joint-axis-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-body);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .joint-values-display {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 11px;
-}
-
-.val-item {
-  white-space: nowrap;
 }
 
 .val-item.actual {
@@ -629,100 +630,59 @@ html, body {
 
 .val-diff {
   font-size: 10px;
-  color: #ea580c;
+  color: #d97706;
   font-weight: 700;
   font-family: var(--font-mono);
-  background: #fff7ed;
-  padding: 1px 5px;
-  border-radius: 4px;
-  white-space: nowrap;
 }
 
 .joint-inputs-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.limit-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-  min-width: 38px;
-  user-select: none;
-}
-
-.limit-tag.min {
-  text-align: right;
-}
-
-.limit-tag.max {
-  text-align: left;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
 .joint-range-slider {
   flex: 1;
-  height: 6px;
+  height: 4px;
   background: #e2e8f0;
-  border-radius: 3px;
+  border-radius: 2px;
   outline: none;
   cursor: pointer;
   accent-color: var(--kuka-orange);
-}
-
-.val-box-actual {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  color: #0369a1;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 6px;
-  padding: 3px 8px;
-  min-width: 58px;
-  text-align: right;
-  white-space: nowrap;
-  user-select: none;
 }
 
 .numeric-input-wrapper {
   display: flex;
   align-items: center;
   background: #ffffff;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 2px 6px;
 }
 
 .joint-number-field {
-  width: 50px;
+  width: 58px;
   border: none;
   font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-main);
   outline: none;
   text-align: right;
-  background: transparent;
 }
 
 .unit-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
   color: var(--text-muted);
-  margin-left: 2px;
+  margin-left: 3px;
 }
 
-.preset-btn.sync-btn {
-  background: #f0f9ff;
-  color: #0369a1;
-  border-color: #bae6fd;
-  font-weight: 700;
-}
-
-.preset-btn.sync-btn:hover {
-  background: #e0f2fe;
-  border-color: #7dd3fc;
+.joint-limit-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-faint);
 }
 
 /* Lifecycle Stepper */
@@ -807,38 +767,6 @@ html, body {
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--border-subtle);
-}
-
-.btn-power-reset:hover {
-  background: #22c55e;
-}
-
-.footer-btn-row {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-auto-cycle {
-  flex: 1;
-  padding: 12px;
-  background: var(--kuka-orange);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 11.5px;
-  box-shadow: 0 0 14px var(--kuka-orange-glow);
-  transition: all 0.15s ease;
-}
-
-.btn-auto-cycle:hover:not(:disabled) {
-  background: #fb8c3c;
-  box-shadow: 0 0 18px rgba(249, 115, 22, 0.45);
-}
-
-.btn-auto-cycle.running {
-  background: #f59e0b;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
 }
 
 .btn-preview {
@@ -965,128 +893,6 @@ html, body {
 
 .tab-nav-item:hover {
   color: var(--text-main);
-}
-
-.btn-estop:hover {
-  background: #ef4444;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-}
-
-/* ==========================================================================
-   VIEWPORT BOTTOM SAFETY GRILL CONTROLS & STATUS BOXES
-   ========================================================================== */
-.viewport-bottom-bar {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.safety-grill-toggle {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-main);
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(12px);
-  transition: all 0.15s ease;
-}
-
-.safety-grill-toggle:hover {
-  border-color: #0284c7;
-  color: #0284c7;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.2);
-}
-
-.safety-grill-toggle.active {
-  border-color: rgba(16, 185, 129, 0.4);
-  background: rgba(240, 253, 244, 0.95);
-  color: #15803d;
-}
-
-.safety-status-boxes {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-box-indicator {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 800;
-  font-family: var(--font-mono);
-  background: var(--bg-panel);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(12px);
-}
-
-.status-box-indicator .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.status-box-indicator.green {
-  border-color: rgba(22, 163, 74, 0.4);
-  color: #15803d;
-  background: rgba(240, 253, 244, 0.9);
-}
-
-.status-box-indicator.green .dot {
-  background: #16a34a;
-  box-shadow: 0 0 6px #16a34a;
-}
-
-.status-box-indicator.amber {
-  border-color: rgba(217, 119, 6, 0.4);
-  color: #b45309;
-  background: rgba(254, 243, 199, 0.9);
-}
-
-.status-box-indicator.amber .dot {
-  background: #f59e0b;
-  box-shadow: 0 0 6px #f59e0b;
-}
-
-.status-box-indicator.red {
-  border-color: rgba(220, 38, 38, 0.4);
-  color: #b91c1c;
-  background: rgba(254, 226, 226, 0.9);
-}
-
-.status-box-indicator.red .dot {
-  background: #dc2626;
-  box-shadow: 0 0 6px #dc2626;
-}
-
-.status-box-indicator.gray {
-  border-color: rgba(100, 116, 139, 0.3);
-  color: #64748b;
-  background: rgba(241, 245, 249, 0.9);
-}
-
-.status-box-indicator.gray .dot {
-  background: #94a3b8;
 }
 
 .tab-nav-item.active {
@@ -1221,242 +1027,16 @@ html, body {
 }
 
 /* ---------------------------------------------------------------------------
-   MNC Notification UI & Toast System (Matching Reference Image)
+   Notification Bell & Drawer
 --------------------------------------------------------------------------- */
-
-/* Toast Floating Stack Container */
-.mnc-toast-container {
-  position: fixed;
-  top: 76px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  pointer-events: none;
-  width: 390px;
-  max-width: calc(100vw - 32px);
-}
-
-/* Base Toast Card */
-.mnc-toast-card {
-  pointer-events: auto;
-  position: relative;
-  border-radius: 14px;
-  padding: 16px 20px;
-  box-shadow:
-    0 4px 20px -2px rgba(0, 0, 0, 0.05),
-    0 2px 6px -1px rgba(0, 0, 0, 0.03);
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  animation: mncToastIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.mnc-toast-card:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 6px 24px -2px rgba(0, 0, 0, 0.07),
-    0 2px 8px -1px rgba(0, 0, 0, 0.04);
-}
-
-.mnc-toast-card-exit {
-  animation: mncToastOut 0.18s ease forwards;
-}
-
-@keyframes mncToastIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes mncToastOut {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.96);
-  }
-}
-
-/* Exact Card Color Variants from Reference Image */
-
-/* 1. Success Card (Green tint top-left -> White) */
-.mnc-card-success {
-  background: linear-gradient(135deg, #eefbf4 0%, #f7fdfa 35%, #ffffff 70%);
-  border: 1px solid #cbf7dd;
-}
-.mnc-card-success .mnc-icon-badge {
-  background: #259d57;
-}
-
-/* 2. Info Card (Soft Blue tint top-left -> White) */
-.mnc-card-info {
-  background: linear-gradient(135deg, #edf5ff 0%, #f8faff 35%, #ffffff 70%);
-  border: 1px solid #d8e8fc;
-}
-.mnc-card-info .mnc-icon-badge {
-  background: #3b82f6;
-}
-
-/* 3. Error / Critical Card (Soft Red tint top-left -> White) */
-.mnc-card-error {
-  background: linear-gradient(135deg, #fdf2f2 0%, #fef9f9 35%, #ffffff 70%);
-  border: 1px solid #fecaca;
-}
-.mnc-card-error .mnc-icon-badge {
-  background: #d44333;
-}
-
-/* 4. Warning Card (Soft Amber tint top-left -> White) */
-.mnc-card-warning {
-  background: linear-gradient(135deg, #fffbeb 0%, #fefcf3 35%, #ffffff 70%);
-  border: 1px solid #fed7aa;
-}
-.mnc-card-warning .mnc-icon-badge {
-  background: #f59e0b;
-}
-
-/* 5. Robot Event (Soft KUKA Orange tint) */
-.mnc-card-robot {
-  background: linear-gradient(135deg, #fff7ed 0%, #fffcf8 35%, #ffffff 70%);
-  border: 1px solid #fed7aa;
-}
-.mnc-card-robot .mnc-icon-badge {
-  background: #ea580c;
-}
-
-/* Circular Solid Status Badge with White Icon Inside */
-.mnc-icon-badge {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-/* Card Content Area */
-.mnc-card-content {
-  flex: 1;
-  min-width: 0;
-  padding-right: 18px;
-}
-
-.mnc-card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mnc-card-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #111827;
-  letter-spacing: -0.015em;
-  line-height: 1.35;
-}
-
-.mnc-cmd-tag {
-  font-size: 10.5px;
-  font-family: var(--font-mono);
-  background: rgba(0, 0, 0, 0.04);
-  padding: 1px 5px;
-  border-radius: 4px;
-  color: #4b5563;
-  font-weight: 500;
-}
-
-.mnc-card-message {
-  font-size: 13.5px;
-  font-weight: 400;
-  color: #4b5563;
-  line-height: 1.48;
-  margin-top: 4px;
-  word-break: break-word;
-}
-
-/* Action Links (e.g. Retry | Dismiss) */
-.mnc-card-actions {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.mnc-action-primary {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #2563eb;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.mnc-action-primary:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
-
-.mnc-action-secondary {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #6b7280;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.mnc-action-secondary:hover {
-  color: #111827;
-}
-
-/* Top-Right Minimal Close Icon Button */
-.mnc-card-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 3px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s ease;
-}
-
-.mnc-card-close:hover {
-  color: #374151;
-}
-
-/* ---------------------------------------------------------------------------
-   MNC Notification Bell & Dropdown Popover
---------------------------------------------------------------------------- */
-.mnc-bell-root {
+.notification-bell-root {
   position: relative;
 }
 
-.mnc-bell-btn {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+.bell-trigger-btn {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-body);
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -1468,390 +1048,349 @@ html, body {
   transition: all 0.15s ease;
 }
 
-.mnc-bell-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
+.bell-trigger-btn:hover {
+  background: #e2e8f0;
+  color: var(--text-main);
 }
 
-.mnc-bell-btn.active {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
-}
-
-.mnc-bell-dot {
+.bell-badge-count {
   position: absolute;
-  top: 7px;
-  right: 7px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #ef4444;
-  box-shadow: 0 0 0 2px #ffffff;
-}
-
-/* Dropdown Popover Panel */
-.mnc-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 410px;
-  max-width: 92vw;
-  max-height: min(580px, calc(100vh - 90px));
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow:
-    0 12px 32px -4px rgba(0, 0, 0, 0.08),
-    0 2px 6px -1px rgba(0, 0, 0, 0.04);
-  z-index: 95;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: mncToastIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mnc-popover-header {
-  padding: 14px 16px 10px 16px;
-  border-bottom: 1px solid #f3f4f6;
-  background: #ffffff;
-}
-
-.mnc-header-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.mnc-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mnc-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  letter-spacing: -0.01em;
-}
-
-.mnc-unread-badge {
-  font-size: 11px;
-  font-weight: 600;
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 1px 7px;
+  top: -4px;
+  right: -4px;
+  background: var(--color-error);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 4px;
   border-radius: 9999px;
-}
-
-.mnc-all-read-text {
-  font-size: 11px;
-  color: #10b981;
-  font-weight: 500;
-}
-
-.mnc-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mnc-action-link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  color: #374151;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.mnc-action-link:hover {
-  background: #f1f5f9;
-  color: #111827;
-}
-
-.mnc-close-btn {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.mnc-close-btn:hover {
-  color: #111827;
+.notification-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(2px);
+  z-index: 50;
 }
 
-.mnc-tabs-row {
+.notification-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 90vw;
+  background: var(--bg-surface);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.drawer-title-group {
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.mnc-segmented-control {
-  display: flex;
-  background: #f1f5f9;
-  padding: 2px;
-  border-radius: 8px;
-  gap: 2px;
+.drawer-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
-.mnc-segment-btn {
+.drawer-count-chip {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mark-all-read-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   background: transparent;
   border: none;
   font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-  padding: 4px 9px;
-  border-radius: 6px;
+  font-weight: 700;
+  color: #0284c7;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-.mnc-segment-btn.active {
-  background: #ffffff;
-  color: #0f172a;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-}
-
-.mnc-search-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex: 1;
-  max-width: 140px;
-}
-
-.mnc-search-icon {
-  position: absolute;
-  left: 7px;
-  color: #94a3b8;
-  pointer-events: none;
-}
-
-.mnc-search-input {
-  width: 100%;
-  height: 26px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0 20px 0 22px;
-  font-size: 11px;
-  color: #0f172a;
-}
-
-.mnc-search-input:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: #ffffff;
-}
-
-.mnc-search-clear {
-  position: absolute;
-  right: 5px;
-  background: none;
+.drawer-close-btn {
+  background: transparent;
   border: none;
-  color: #9ca3af;
+  color: var(--text-muted);
   cursor: pointer;
-  display: flex;
-  align-items: center;
 }
 
-/* List Body */
-.mnc-list-body {
+.drawer-filters {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #f8fafc;
+}
+
+.filter-pill {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.drawer-list {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 14px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 380px;
-  scrollbar-width: thin;
 }
 
-.mnc-item {
-  position: relative;
+.empty-notifications {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.notification-item {
+  display: flex;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #f3f4f6;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
   background: #ffffff;
+  position: relative;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.mnc-item:hover {
-  background: #f9fafb;
-  border-color: #e5e7eb;
+.notification-item:hover {
+  box-shadow: var(--shadow-sm);
 }
 
-.mnc-item.is-unread {
-  border-color: #dbeafe;
-  background: linear-gradient(135deg, #f8faff 0%, #ffffff 50%);
+.notification-item.unread {
+  background: #f0f9ff;
+  border-color: #bae6fd;
 }
 
-.mnc-item.is-critical {
-  border-color: #fecaca;
-  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 50%);
+.notif-icon {
+  margin-top: 2px;
 }
 
-.mnc-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  margin-top: 5px;
-  flex-shrink: 0;
-}
+.notif-info .notif-icon { color: #0284c7; }
+.notif-success .notif-icon { color: #059669; }
+.notif-warning .notif-icon { color: #d97706; }
+.notif-error .notif-icon { color: #dc2626; }
 
-.dot-info { background: #3b82f6; }
-.dot-success { background: #10b981; }
-.dot-warning { background: #f59e0b; }
-.dot-error { background: #ef4444; }
-.dot-critical { background: #dc2626; box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2); }
-
-.mnc-item-body {
+.notif-content {
   flex: 1;
-  min-width: 0;
 }
 
-.mnc-item-headline {
+.notif-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+.notif-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.notif-time {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.notif-message {
+  font-size: 11px;
+  color: var(--text-body);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.notif-footer {
+  display: flex;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.notif-cmd-tag {
+  font-family: var(--font-mono);
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #334155;
+}
+
+.notif-err-tag {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.unread-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0284c7;
+}
+
+/* ---------------------------------------------------------------------------
+   Toast Notifications (Top Layer / Top Right Stack)
+--------------------------------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: 380px;
+  width: 100%;
+}
+
+.toast-card {
+  pointer-events: auto;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-left-width: 4px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-info {
+  border-left-color: #0284c7;
+}
+.toast-info .toast-icon-wrapper {
+  color: #0284c7;
+}
+
+.toast-success {
+  border-left-color: #059669;
+}
+.toast-success .toast-icon-wrapper {
+  color: #059669;
+}
+
+.toast-warning {
+  border-left-color: #d97706;
+}
+.toast-warning .toast-icon-wrapper {
+  color: #d97706;
+}
+
+.toast-error {
+  border-left-color: #dc2626;
+}
+.toast-error .toast-icon-wrapper {
+  color: #dc2626;
+}
+
+.toast-body {
+  flex: 1;
+}
+
+.toast-header-row {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 2px;
 }
 
-.mnc-item-title {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #111827;
+.toast-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
-.mnc-critical-badge {
-  font-size: 9px;
-  font-weight: 700;
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 0 4px;
-  border-radius: 3px;
-}
-
-.mnc-item-cmd {
-  font-size: 10px;
+.toast-cmd-badge {
   font-family: var(--font-mono);
+  font-size: 10px;
   background: #f1f5f9;
-  padding: 0 4px;
+  padding: 1px 4px;
   border-radius: 3px;
   color: #475569;
 }
 
-.mnc-item-time {
-  font-size: 10px;
-  color: #9ca3af;
-  margin-left: auto;
+.toast-message {
+  font-size: 11px;
+  color: var(--text-body);
+  line-height: 1.35;
 }
 
-.mnc-item-desc {
-  font-size: 12px;
-  color: #4b5563;
-  line-height: 1.4;
-}
-
-.mnc-item-meta {
+.toast-meta {
   font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
   font-family: var(--font-mono);
-  color: #6b7280;
-  margin-top: 3px;
-  display: flex;
-  gap: 8px;
 }
 
-.mnc-item-actions {
-  display: flex;
-  gap: 3px;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.mnc-item:hover .mnc-item-actions {
-  opacity: 1;
-}
-
-.mnc-item-btn {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.12s ease;
-}
-
-.mnc-item-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-.mnc-empty-state {
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.mnc-empty-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 4px;
-}
-
-.mnc-empty-desc {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.mnc-popover-footer {
-  padding: 10px 16px;
-  border-top: 1px solid #f3f4f6;
-  background: #fafafa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mnc-archive-link {
-  background: none;
+.toast-close-btn {
+  background: transparent;
   border: none;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #2563eb;
+  color: var(--text-muted);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.mnc-archive-link:hover {
-  text-decoration: underline;
+  padding: 2px;
 }
 
 /* ---------------------------------------------------------------------------
@@ -2053,311 +1592,66 @@ html, body {
   transition: width 0.1s ease;
 }
 
-/* ---------------------------------------------------------------------------
-   Notifications Archive & Audit Table View
---------------------------------------------------------------------------- */
-.notif-archive-container {
+.notifications-archive-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  height: 100%;
-}
-
-.notif-archive-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
-.archive-toolbar-left,
-.archive-toolbar-right {
+.archive-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+}
+
+.archive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 10px;
 }
 
-.archive-title-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.archive-panel-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.archive-count-chip {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.archive-search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.archive-search-input {
-  width: 200px;
-  height: 28px;
+.archive-card {
   background: #ffffff;
   border: 1px solid var(--border-subtle);
-  border-radius: 6px;
-  padding: 0 24px 0 26px;
-  font-size: 11px;
-  color: var(--text-main);
-  transition: width 0.2s ease, border-color 0.15s ease;
-}
-
-.archive-search-input:focus {
-  outline: none;
-  border-color: var(--kuka-orange);
-  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.12);
-  width: 240px;
-}
-
-.btn-archive-action {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #ffffff;
-  border: 1px solid var(--border-subtle);
-  color: #334155;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 9px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-archive-action:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: var(--border-strong);
-  color: var(--text-main);
-}
-
-.notif-archive-filter-row {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
-.archive-filter-pill {
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  padding: 3px 10px;
-  border-radius: 9999px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.archive-filter-pill:hover {
-  background: #f1f5f9;
-  color: var(--text-main);
-}
-
-.archive-filter-pill.active {
-  background: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
-}
-
-.notif-table-wrapper {
-  background: #ffffff;
-  border: 1px solid var(--border-subtle);
+  border-left-width: 3px;
   border-radius: 8px;
-  overflow: auto;
-  max-height: 320px;
+  padding: 10px 12px;
 }
 
-.notif-archive-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-  text-align: left;
+.archive-card.notif-info { border-left-color: #0284c7; }
+.archive-card.notif-success { border-left-color: #059669; }
+.archive-card.notif-warning { border-left-color: #d97706; }
+.archive-card.notif-error { border-left-color: #dc2626; }
+
+.archive-card-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
-.notif-archive-table th {
-  position: sticky;
-  top: 0;
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 8px 12px;
-  font-size: 10px;
+.archive-badge {
+  font-size: 9px;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-muted);
-  letter-spacing: 0.03em;
-  z-index: 2;
 }
 
-.notif-archive-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle;
-}
-
-.archive-row:hover {
-  background: #f8fafc;
-}
-
-.archive-row.row-unread {
-  background: rgba(2, 132, 199, 0.03);
-}
-
-.cell-timestamp {
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-mono);
-}
-
-.timestamp-time {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.timestamp-date {
-  font-size: 9px;
-  color: var(--text-faint);
-}
-
-.notif-badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 9px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 9999px;
-  letter-spacing: 0.03em;
-}
-
-.pill-info { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; }
-.pill-success { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
-.pill-warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-.pill-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-.pill-robot { background: #fff7ed; color: var(--kuka-orange); border: 1px solid #fed7aa; }
-
-.cell-event-tag {
-  font-size: 10px;
-  font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
-  padding: 2px 5px;
-  border-radius: 4px;
-}
-
-.cell-cmd-tag {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: #0f172a;
-  font-weight: 600;
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-
-.cell-message-block {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.row-title {
-  font-weight: 700;
-  color: var(--text-main);
-  font-size: 11px;
-}
-
-.row-desc {
-  color: var(--text-body);
-  font-size: 11px;
-  line-height: 1.35;
-}
-
-.row-meta {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: #64748b;
-  margin-top: 2px;
-}
-
-.status-pill {
-  font-size: 9px;
-  font-weight: 800;
-  padding: 1px 6px;
-  border-radius: 9999px;
-}
-
-.status-pill.unread {
-  background: #e0f2fe;
-  color: #0284c7;
-}
-
-.status-pill.read {
-  background: #f1f5f9;
-  color: #94a3b8;
-}
-
-.row-actions-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 4px;
-}
-
-.btn-row-action {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-row-action:hover {
-  background: #ecfdf5;
-  color: #059669;
-  border-color: #a7f3d0;
-}
-
-.btn-row-delete:hover {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fecaca;
-}
-
-.notif-empty-table-cell {
-  padding: 40px;
-  text-align: center;
-}
-
-.empty-table-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
+.archive-title {
   font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
 }
 
+.archive-message {
+  font-size: 11px;
+  color: var(--text-body);
+  margin-bottom: 4px;
+}
+</style></head>
+  <body>
+    <div id="root"><div class="kuka-app-root"><header class="kuka-header"><div class="header-left"><div class="brand-logo-badge"><span class="brand-kuka-text">KUKA</span><span class="brand-sub-tag">KR C5 DIGITAL TWIN</span></div><div class="robot-select-group"><label class="text-xs text-slate-500 font-medium">Unit:</label><select class="robot-select-input"><option value="KUKA-01">KUKA-01 (KR CYBERTECH)</option><option value="KUKA-02">KUKA-02 (Welding Cell B)</option></select></div><div class="connection-pill offline"><span class="dot"></span><span>OFFLINE</span></div><div class="drives-pill energized"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap" aria-hidden="true"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"></path></svg><span>400V DRIVES ON</span></div></div><div class="header-right"><div class="mode-toggle-group"><button class="mode-btn ">SIMULATION</button><button class="mode-btn live active">LIVE ROBOT</button></div><button class="header-icon-btn" title="Mute audio"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume2 lucide-volume-2" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path><path d="M16 9a5 5 0 0 1 0 6"></path><path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path></svg></button><div class="notification-bell-root"><button class="bell-trigger-btn" title="View Notifications" aria-label="Notifications"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></button></div><button class="btn-header-estop " title="Emergency Stop (Clamp Brakes)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-octagon-alert" aria-hidden="true"><path d="M12 16h.01"></path><path d="M12 8v4"></path><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"></path></svg><span>E-STOP</span></button></div></header><main class="main-viewport-grid"><section class="viewport-column"><div class="three-viewport-container"><div class="viewport-hud-top"><span class="hud-badge-title"><span class="pulse-dot"></span>KUKA KR CYBERTECH 3D DIGITAL TWIN</span><span class="hud-sep">|</span><span class="hud-coords">TCP: X: Y: Z: mm</span><span class="hud-sep">|</span><span class="hud-step">Circular Pipe Collar (ASME B31.3): CLOSED-LOOP FEEDBACK</span></div><div class="viewport-status-panel"><div class="vsp-header"><span class="vsp-robot-name">KUKA-01</span><span class="vsp-status-chip idle">IDLE</span></div><div class="vsp-row"><span class="vsp-label">Target:</span><span class="vsp-val font-mono">A1:0.0 A2:-30.6 A3:29.4</span></div><div class="vsp-row"><span class="vsp-label">Actual:</span><span class="vsp-val font-mono">A1:0.0 A2:-30.6 A3:29.4</span></div><div class="vsp-row footer-row"><span class="vsp-label">Mode: LIVE</span></div></div><div class="viewport-camera-toolbar"><button class="cam-btn">ISO</button><button class="cam-btn">TOP</button><button class="cam-btn">FRONT</button><button class="cam-btn">SIDE</button></div></div></section><section class="control-column"><div class="joint-control-panel"><div class="panel-header"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sliders-vertical text-slate-600" aria-hidden="true"><path d="M10 8h4"></path><path d="M12 21v-9"></path><path d="M12 8V3"></path><path d="M17 16h4"></path><path d="M19 12V3"></path><path d="M19 21v-5"></path><path d="M3 14h4"></path><path d="M5 10V3"></path><path d="M5 21v-7"></path></svg><h2 class="panel-title">6-Axis Joint Controller</h2></div><div class="flex items-center gap-2"><span class="status-pill status-pill-green">Drives Energized</span><span class="mode-badge">LIVE</span></div></div><div class="presets-bar"><span class="presets-label">Presets:</span><div class="presets-buttons"><button class="preset-btn">Home Standby</button><button class="preset-btn">High Approach</button><button class="preset-btn">Welding Seam</button><button class="preset-btn">Torch Clean</button></div></div><div class="joint-grid"><div class="joint-card"><div class="joint-card-top"><div class="joint-title-group"><span class="joint-axis-tag">A1</span><span class="joint-axis-name">Turntable</span></div><div class="joint-values-display"><span class="val-item actual">Actual: <strong>0.00 deg</strong></span><span class="val-item target">Target: <strong>0.00 deg</strong></span></div></div><div class="joint-inputs-row"><input type="range" min="-185" max="185" step="0.5" class="joint-range-slider" value="0"><div class="numeric-input-wrapper"><input type="number" min="-185" max="185" step="1" class="joint-number-field" value="0"><span class="unit-label">deg</span></div></div><div class="joint-limit-footer"><span>Min: -185 deg</span><span>Max: 185 deg</span></div></div><div class="joint-card"><div class="joint-card-top"><div class="joint-title-group"><span class="joint-axis-tag">A2</span><span class="joint-axis-name">Shoulder</span></div><div class="joint-values-display"><span class="val-item actual">Actual: <strong>-30.60 deg</strong></span><span class="val-item target">Target: <strong>-30.60 deg</strong></span></div></div><div class="joint-inputs-row"><input type="range" min="-155" max="35" step="0.5" class="joint-range-slider" value="-30.6"><div class="numeric-input-wrapper"><input type="number" min="-155" max="35" step="1" class="joint-number-field" value="-30.6"><span class="unit-label">deg</span></div></div><div class="joint-limit-footer"><span>Min: -155 deg</span><span>Max: 35 deg</span></div></div><div class="joint-card"><div class="joint-card-top"><div class="joint-title-group"><span class="joint-axis-tag">A3</span><span class="joint-axis-name">Elbow</span></div><div class="joint-values-display"><span class="val-item actual">Actual: <strong>29.40 deg</strong></span><span class="val-item target">Target: <strong>29.40 deg</strong></span></div></div><div class="joint-inputs-row"><input type="range" min="-130" max="154" step="0.5" class="joint-range-slider" value="29.4"><div class="numeric-input-wrapper"><input type="number" min="-130" max="154" step="1" class="joint-number-field" value="29.4"><span class="unit-label">deg</span></div></div><div class="joint-limit-footer"><span>Min: -130 deg</span><span>Max: 154 deg</span></div></div><div class="joint-card"><div class="joint-card-top"><div class="joint-title-group"><span class="joint-axis-tag">A4</span><span class="joint-axis-name">Forearm Roll</span></div><div class="joint-values-display"><span class="val-item actual">Actual: <strong>0.00 deg</strong></span><span class="val-item target">Target: <strong>0.00 deg</strong></span></div></div><div class="joint-inputs-row"><input type="range" min="-350" max="350" step="0.5" class="joint-range-slider" value="0"><div class="numeric-input-wrapper"><input type="number" min="-350" max="350" step="1" class="joint-number-field" value="0"><span class="unit-label">deg</span></div></div><div class="joint-limit-footer"><span>Min: -350 deg</span><span>Max: 350 deg</span></div></div><div class="joint-card"><div class="joint-card-top"><div class="joint-title-group"><span class="joint-axis-tag">A5</span><span class="joint-axis-name">Wrist Pitch</span></div><div class="joint-values-display"><span class="val-item actual">Actual: <strong>43.80 deg</strong></span><span class="val-item target">Target: <strong>43.80 deg</strong></span></div></div><div class="joint-inputs-row"><input type="range" min="-130" max="130" step="0.5" class="joint-range-slider" value="43.8"><div class="numeric-input-wrapper"><input type="number" min="-130" max="130" step="1" class="joint-number-field" value="43.8"><span class="unit-label">deg</span></div></div><div class="joint-limit-footer"><span>Min: -130 deg</span><span>Max: 130 deg</span></div></div><div class="joint-card"><div class="joint-card-top"><div class="joint-title-group"><span class="joint-axis-tag">A6</span><span class="joint-axis-name">Flange Roll</span></div><div class="joint-values-display"><span class="val-item actual">Actual: <strong>-112.50 deg</strong></span><span class="val-item target">Target: <strong>-112.50 deg</strong></span></div></div><div class="joint-inputs-row"><input type="range" min="-350" max="350" step="0.5" class="joint-range-slider" value="-112.5"><div class="numeric-input-wrapper"><input type="number" min="-350" max="350" step="1" class="joint-number-field" value="-112.5"><span class="unit-label">deg</span></div></div><div class="joint-limit-footer"><span>Min: -350 deg</span><span>Max: 350 deg</span></div></div></div><div class="panel-actions-toolbar"><button class="btn-preview " title="Toggle 3D target preview ghost model"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Preview in 3D</button><button class="btn-send-command"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg>Send to Robot</button><button class="btn-estop"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-octagon-alert" aria-hidden="true"><path d="M12 16h.01"></path><path d="M12 8v4"></path><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"></path></svg>E-STOP</button></div></div></section></main><section class="bottom-workspace-tabs"><div class="tabs-header-bar"><div class="tabs-nav-buttons"><button class="tab-nav-item active"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw-clock" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>Command History (0)</button><button class="tab-nav-item "><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Notifications Archive (0)</button><button class="tab-nav-item "><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg>Verified Telemetry Stream</button><button class="tab-nav-item "><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>Audit Trail</button></div></div><div class="tabs-content-area"><div class="history-table-card"><div class="history-table-header"><div class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw-clock text-slate-600" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg><h3 class="history-title">Command Execution History</h3><span class="history-count">(0 records)</span></div><button class="btn-table-refresh" title="Refresh command history"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>Refresh</button></div><div class="table-responsive"><table class="kuka-table"><thead><tr><th>Command ID</th><th>Mode</th><th>Target Position</th><th>Actual Reached Position</th><th>Status</th><th>Submitted Time</th><th>Duration</th></tr></thead><tbody><tr><td colspan="7" class="table-empty">No commands recorded in session.</td></tr></tbody></table></div></div></div></section></div></div>
+    <script type="module" src="/src/main.jsx?t=1788030995024"></script>
+  
+
+</body></html>

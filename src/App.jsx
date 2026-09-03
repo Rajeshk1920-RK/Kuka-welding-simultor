@@ -1,62 +1,80 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ThreeViewport from './components/ThreeViewport';
+import JointControlPanel from './components/JointControlPanel';
+import NotificationBell from './components/NotificationBell';
+import ToastNotificationStack from './components/ToastNotificationStack';
+import CommandHistoryTable from './components/CommandHistoryTable';
+import LiveSafetyModal from './components/LiveSafetyModal';
 import TeachPendant from './components/TeachPendant';
-import { RobotKinematics } from './kinematics';
+import NotificationsArchiveTable from './components/NotificationsArchiveTable';
 import { METALS, WORKPIECE_SHAPES } from './materials';
-import { Volume2, VolumeX, Zap, Radio } from 'lucide-react';
+import {
+  Activity,
+  AlertOctagon,
+  CheckCircle2,
+  Cpu,
+  History,
+  Info,
+  Radio,
+  RefreshCw,
+  RotateCcw,
+  Shield,
+  Sliders,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  Zap
+} from 'lucide-react';
 
-const kinematics = new RobotKinematics();
+const API_BASE = 'http://127.0.0.1:8000/api';
+const WS_BASE = 'ws://127.0.0.1:8000/ws/robots/KUKA-01';
 
-// Calibrated Natural Industrial Home Standby Pose (Folded ready pose)
-const HOME_COORDS = { x: 450.0, y: 0.0, z: 600.0 };
+const DEFAULT_JOINTS = {
+  a1: 0.0,
+  a2: -30.6,
+  a3: 29.4,
+  a4: 0.0,
+  a5: 43.8,
+  a6: -112.5,
+};
 
 export default function App() {
-  const [targetPos, setTargetPos] = useState(HOME_COORDS);
-  const [dispPos, setDispPos] = useState(HOME_COORDS);
-  const [jointAngles, setJointAngles] = useState({ A1: 0, A2: -26, A3: 94, A4: 0, A5: -68, A6: -108 });
+  // Core Robot State
+  const [robotId, setRobotId] = useState('KUKA-01');
+  const [robotStatus, setRobotStatus] = useState('idle');
+  const [robotMode, setRobotMode] = useState('LIVE'); // 'LIVE' | 'SIMULATION'
+  const [drivesEnergized, setDrivesEnergized] = useState(true);
+  const [wsConnected, setWsConnected] = useState(false);
 
-  const [isPoweredOn, setIsPoweredOn] = useState(true);
-  const [isAutoCycle, setIsAutoCycle] = useState(false);
-  const [isWelding, setIsWelding] = useState(false);
-  const [selectedMetalKey, setSelectedMetalKey] = useState('carbon_steel');
-  const [selectedShapeKey, setSelectedShapeKey] = useState('circle_pipe');
-  const [speedOverride, setSpeedOverride] = useState(50); // Default to Normal Realistic Speed (50%)
-  const [jogStep, setJogStep] = useState(25.0);
+  // Kinematics: Commanded Target vs Authoritative Actual Feedback
+  const [targetJoints, setTargetJoints] = useState(DEFAULT_JOINTS);
+  const [actualJoints, setActualJoints] = useState(DEFAULT_JOINTS);
+  const [isPreviewActive, setIsPreviewActive] = useState(false);
+  const isPreviewActiveRef = useRef(false);
+
+  useEffect(() => {
+    isPreviewActiveRef.current = isPreviewActive;
+  }, [isPreviewActive]);
+
+  // Command Execution State Machine
+  const [activeCommandState, setActiveCommandState] = useState(null);
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [commandHistory, setCommandHistory] = useState([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+
+  // Notification Engine State
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [toasts, setToasts] = useState([]);
+
+  // UI Tabs & Views
+  const [activeBottomTab, setActiveBottomTab] = useState('history'); // 'history' | 'notifications' | 'telemetry' | 'audit' | 'teach'
+  const [auditLogs, setAuditLogs] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [cameraPreset, setCameraPreset] = useState(null);
-  const [autoStepName, setAutoStepName] = useState('HOME STANDBY');
-  const [logs, setLogs] = useState([
-    '[INIT] KUKA KR CYBERTECH Workcell Initialized.',
-    '[SYS] Calibrated Normal Industrial Travel Speed Online.',
-    '[SYS] 10 Industrial Metallurgy Profiles & 4 CAD Joint Shapes Active.'
-  ]);
 
-  // KRL Code Script Execution Engine State
-  const [krlCode, setKrlCode] = useState(WORKPIECE_SHAPES.circle_pipe.krlCode);
-  const [isScriptRunning, setIsScriptRunning] = useState(false);
-  const [currentScriptLine, setCurrentScriptLine] = useState(0);
-
-  const targetPosRef = useRef(targetPos);
-  targetPosRef.current = targetPos;
-
-  const scriptExecutionRef = useRef({ isRunning: false, currentLine: 0, lines: [] });
-
-  // Update KRL Template when Workpiece Shape changes
-  useEffect(() => {
-    if (WORKPIECE_SHAPES[selectedShapeKey]) {
-      setKrlCode(WORKPIECE_SHAPES[selectedShapeKey].krlCode);
-      addLog(`Selected Workpiece Joint: ${WORKPIECE_SHAPES[selectedShapeKey].name}`);
-    }
-  }, [selectedShapeKey]);
-
-  const addLog = (msg) => {
-    const time = new Date().toLocaleTimeString();
-    setLogs((prev) => [`[${time}] ${msg}`, ...prev.slice(0, 50)]);
-  };
-
-  // Web Audio Synthesizer
+  // Audio Context
   const audioCtxRef = useRef(null);
-  const weldOscRef = useRef(null);
 
   const initAudio = () => {
     if (!audioCtxRef.current) {
@@ -64,396 +82,682 @@ export default function App() {
     }
   };
 
-  const playWeldSound = () => {
-    if (!soundEnabled || !isPoweredOn || weldOscRef.current) return;
-    initAudio();
-    if (!audioCtxRef.current) return;
-
-    try {
-      const ctx = audioCtxRef.current;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(120, ctx.currentTime);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      weldOscRef.current = { osc, gain };
-    } catch (e) {
-      console.warn('Audio error:', e);
-    }
-  };
-
-  const stopWeldSound = () => {
-    if (weldOscRef.current) {
-      try {
-        weldOscRef.current.osc.stop();
-        weldOscRef.current.osc.disconnect();
-      } catch (e) {}
-      weldOscRef.current = null;
-    }
-  };
-
-  const playEstopSound = () => {
+  const playChime = (freq = 520, duration = 0.2) => {
     if (!soundEnabled) return;
-    initAudio();
-    if (!audioCtxRef.current) return;
-
     try {
+      initAudio();
+      if (!audioCtxRef.current) return;
       const ctx = audioCtxRef.current;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(320, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(35, ctx.currentTime + 0.4);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.45);
+      osc.stop(ctx.currentTime + duration);
     } catch (e) {}
   };
 
-  // Jog Action Handler
-  const handleJog = (axis, dir) => {
-    if (!isPoweredOn) return;
-    const delta = jogStep * dir;
-    setTargetPos((prev) => {
-      const updated = { ...prev, [axis]: prev[axis] + delta };
-      addLog(`Jog ${axis.toUpperCase()} ${dir > 0 ? '+' : ''}${delta}mm -> ${updated[axis].toFixed(1)}mm`);
-      return updated;
+  // ---------------------------------------------------------------------------
+  // Toast Management (Dismissed via ToastCard hover-pause timers or close button)
+  // ---------------------------------------------------------------------------
+  const addToast = useCallback((notif) => {
+    const toastItem = {
+      id: notif.id || notif.event_id || `toast-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      title: notif.title,
+      message: notif.message,
+      severity: notif.severity || 'INFO',
+      command_id: notif.command_id,
+      payload: notif.payload || {},
+      timestamp: notif.timestamp || notif.created_at || new Date().toISOString(),
+    };
+
+    setToasts((prev) => [toastItem, ...prev.slice(0, 4)]);
+
+    if (notif.severity === 'SUCCESS') playChime(640, 0.25);
+    else if (notif.severity === 'WARNING' || notif.severity === 'ERROR' || notif.severity === 'CRITICAL') playChime(320, 0.35);
+  }, [soundEnabled]);
+
+  const dismissToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // ---------------------------------------------------------------------------
+  // API Fetch Utilities
+  // ---------------------------------------------------------------------------
+  const fetchState = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/robots/${robotId}/state`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.joints) {
+          setActualJoints(data.joints);
+          if (!isPreviewActiveRef.current) {
+            setTargetJoints(data.joints);
+          }
+        }
+        if (data.status) setRobotStatus(data.status);
+        if (data.mode) setRobotMode(data.mode);
+        if (data.drives_energized !== undefined) setDrivesEnergized(data.drives_energized);
+      }
+    } catch (e) {
+      // Backend starting
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/notifications?limit=50`);
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unread_count || 0);
+      }
+    } catch (e) {}
+  };
+
+  const fetchCommandHistory = async () => {
+    setIsHistoryLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/robots/${robotId}/commands?limit=50`);
+      if (res.ok) {
+        const data = await res.json();
+        setCommandHistory(data.commands || []);
+      }
+    } catch (e) {
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  };
+
+  const fetchAuditLogs = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/audit-logs?limit=50`);
+      if (res.ok) {
+        setAuditLogs(data.logs || []);
+      }
+    } catch (e) {}
+  };
+
+  // ---------------------------------------------------------------------------
+  // WebSocket Connection (Telemetry, Notifications, Command Updates)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    let ws;
+    let reconnectTimeout;
+    let isUnmounted = false;
+
+    const connect = () => {
+      try {
+        ws = new WebSocket(WS_BASE);
+
+        ws.onopen = () => {
+          if (isUnmounted) return;
+          setWsConnected(true);
+          fetchState();
+          fetchNotifications();
+          fetchCommandHistory();
+        };
+
+        ws.onmessage = (event) => {
+          if (isUnmounted) return;
+          try {
+            const data = JSON.parse(event.data);
+
+            // 1. Authoritative robot_state feedback stream
+            if (data.type === 'robot_state' && data.payload) {
+              const pl = data.payload;
+              if (pl.actual_joints) {
+                setActualJoints(pl.actual_joints);
+                if (!isPreviewActiveRef.current) {
+                  setTargetJoints(pl.actual_joints);
+                }
+              }
+              if (pl.status) setRobotStatus(pl.status.toLowerCase());
+              if (pl.mode) setRobotMode(pl.mode);
+              if (pl.drives_energized !== undefined) setDrivesEnergized(pl.drives_energized);
+            }
+
+            // 2. Real-time verified notification
+            else if (data.type === 'notification') {
+              setNotifications((prev) => [data, ...prev.filter((n) => n.id !== data.id)]);
+              setUnreadCount((prev) => prev + 1);
+              addToast(data);
+
+              if (data.event === 'COMMAND_COMPLETED') {
+                setIsPreviewActive(false);
+                setActiveCommandState((prev) => ({
+                  ...prev,
+                  status: 'COMPLETED',
+                  event: 'COMMAND_COMPLETED',
+                }));
+                fetchCommandHistory();
+              }
+            }
+
+            // 3. Command Lifecycle state update
+            else if (data.type === 'command_update') {
+              setActiveCommandState({
+                command_id: data.command_id,
+                status: data.status,
+                event: data.event,
+                payload: data.payload,
+              });
+
+              if (['COMPLETED', 'FAILED', 'TIMEOUT', 'STOPPED'].includes(data.status)) {
+                fetchCommandHistory();
+                setTimeout(() => {
+                  setActiveCommandState(null);
+                }, 6000);
+              }
+            }
+          } catch (err) {
+            console.warn('WS parse error:', err);
+          }
+        };
+
+        ws.onclose = () => {
+          if (isUnmounted) return;
+          setWsConnected(false);
+          reconnectTimeout = setTimeout(connect, 2000);
+        };
+
+        ws.onerror = () => {
+          if (ws.readyState === WebSocket.OPEN) ws.close();
+        };
+      } catch (err) {
+        reconnectTimeout = setTimeout(connect, 2000);
+      }
+    };
+
+    connect();
+
+    return () => {
+      isUnmounted = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (ws) ws.close();
+    };
+  }, [robotId, addToast]);
+
+  // Periodic fallback refresh
+  useEffect(() => {
+    fetchState();
+    fetchNotifications();
+    fetchCommandHistory();
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Action Handlers
+  // ---------------------------------------------------------------------------
+  const handleTargetChange = (axis, val) => {
+    setTargetJoints((prev) => ({ ...prev, [axis]: val }));
+    setIsPreviewActive(true);
+  };
+
+  const handleSyncWithRobot = () => {
+    setTargetJoints({ ...actualJoints });
+    setIsPreviewActive(false);
+  };
+
+  const handleApplyPreset = (presetJoints) => {
+    setTargetJoints({ ...presetJoints });
+    setIsPreviewActive(true);
+  };
+
+  const handlePreviewToggle = () => {
+    setIsPreviewActive((prev) => !prev);
+  };
+
+  const handleSendCommandClick = () => {
+    if (robotMode === 'LIVE') {
+      setIsSafetyModalOpen(true);
+    } else {
+      executeSendCommand();
+    }
+  };
+
+  const executeSendCommand = async () => {
+    setIsSafetyModalOpen(false);
+    try {
+      const res = await fetch(`${API_BASE}/robots/${robotId}/commands`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command_type: 'MOVE_JOINT',
+          joints: targetJoints,
+          mode: robotMode,
+          speed: 50.0,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        addToast({
+          title: 'Command Rejected',
+          message: data.detail?.message || 'Pre-flight check failed',
+          severity: 'ERROR',
+        });
+      } else {
+        setActiveCommandState({
+          command_id: data.command_id,
+          status: 'QUEUED',
+          event: 'COMMAND_RECEIVED',
+        });
+      }
+    } catch (err) {
+      addToast({
+        title: 'Network Error',
+        message: 'Could not connect to FastAPI server.',
+        severity: 'ERROR',
+      });
+    }
+  };
+
+  const handleEmergencyStop = async () => {
+    try {
+      await fetch(`${API_BASE}/robots/${robotId}/stop`, { method: 'POST' });
+    } catch (e) {}
+  };
+
+  const handleResetDrives = async () => {
+    try {
+      await fetch(`${API_BASE}/robots/${robotId}/reset`, { method: 'POST' });
+    } catch (e) {}
+  };
+
+  const handleModeChange = async (newMode) => {
+    try {
+      const res = await fetch(`${API_BASE}/robots/${robotId}/mode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: newMode }),
+      });
+      if (res.ok) {
+        setRobotMode(newMode);
+      }
+    } catch (e) {}
+  };
+
+  const handleMarkNotifRead = async (notifId) => {
+    try {
+      await fetch(`${API_BASE}/notifications/${notifId}/read`, { method: 'POST' });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notifId || n.event_id === notifId ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (e) {}
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await fetch(`${API_BASE}/notifications/read-all`, { method: 'POST' });
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (e) {}
+  };
+
+  const handleDeleteNotification = (notifId) => {
+    setNotifications((prev) => {
+      const removed = prev.find((n) => n.id === notifId || n.event_id === notifId);
+      if (removed && !removed.read) {
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+      return prev.filter((n) => n.id !== notifId && n.event_id !== notifId);
     });
   };
 
-  // Preset Action Handler
-  const handlePreset = (x, y, z) => {
-    if (!isPoweredOn) return;
-    setTargetPos({ x, y, z });
-    addLog(`Target Preset -> X:${x} Y:${y} Z:${z}`);
-  };
-
-  // E-Stop Trigger
-  const triggerEstop = () => {
-    setIsPoweredOn(false);
-    setIsAutoCycle(false);
-    setIsWelding(false);
-    setIsScriptRunning(false);
-    scriptExecutionRef.current.isRunning = false;
-    setAutoStepName('E-STOPPED');
-    stopWeldSound();
-    playEstopSound();
-    addLog('[SAFETY-ESTOP] Emergency Stop Engaged: 400V Main Contactors Open! Mechanical Brakes Clamped.');
-  };
-
-  // Power-On Safety Reset
-  const resetPowerOn = () => {
-    setIsPoweredOn(true);
-    setAutoStepName('READY');
-    addLog('[SAFETY-RESET] Safety circuit interlocks reset. 400V Drives ENERGIZED.');
-  };
-
-  // Toggle Auto Cycle with Instant Return to Home
-  const toggleAutoCycle = () => {
-    if (!isPoweredOn) return;
-
-    if (isAutoCycle) {
-      setIsAutoCycle(false);
-      setIsWelding(false);
-      stopWeldSound();
-      setAutoStepName('HOME STANDBY');
-      addLog('[CYCLE-ABORT] Automatic cycle halted. Moving robot to Standby Home (450, 0, 600)...');
-      setTargetPos(HOME_COORDS);
-    } else {
-      setIsAutoCycle(true);
-      const activeShape = WORKPIECE_SHAPES[selectedShapeKey] || WORKPIECE_SHAPES.circle_pipe;
-      addLog(`[CYCLE-START] Executing automated weld cycle on ${activeShape.name} (${METALS[selectedMetalKey].name})...`);
-    }
-  };
-
-  // ===========================================================================
-  // KRL SCRIPT PARSER & INTERPRETER ENGINE
-  // ===========================================================================
-  const parseCoordinates = (line) => {
-    const xMatch = line.match(/X\s*(-?\d+(\.\d+)?)/i);
-    const yMatch = line.match(/Y\s*(-?\d+(\.\d+)?)/i);
-    const zMatch = line.match(/Z\s*(-?\d+(\.\d+)?)/i);
-    return {
-      x: xMatch ? parseFloat(xMatch[1]) : targetPosRef.current.x,
-      y: yMatch ? parseFloat(yMatch[1]) : targetPosRef.current.y,
-      z: zMatch ? parseFloat(zMatch[1]) : targetPosRef.current.z
-    };
-  };
-
-  const executeKrlLine = async (line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith(';') || trimmed.startsWith('&') || trimmed.startsWith('DEF') || trimmed.startsWith('END')) {
-      return 50;
-    }
-
-    addLog(`KRL CMD: ${trimmed}`);
-
-    if (trimmed.toUpperCase().includes('HOME')) {
-      setTargetPos(HOME_COORDS);
-      return 2000;
-    }
-
-    if (trimmed.startsWith('CIRC')) {
-      const coords = parseCoordinates(trimmed);
-      const curX = targetPosRef.current.x - 620;
-      const curY = targetPosRef.current.y;
-      const tgtX = coords.x - 620;
-      const tgtY = coords.y;
-
-      let startAng = Math.atan2(curY, curX);
-      let endAng = Math.atan2(tgtY, tgtX);
-
-      if (endAng <= startAng) endAng += Math.PI * 2;
-      const steps = 8;
-      for (let s = 1; s <= steps; s++) {
-        const frac = s / steps;
-        const ang = startAng + (endAng - startAng) * frac;
-        const subX = 620 + 72 * Math.cos(ang);
-        const subY = 72 * Math.sin(ang);
-        const subZ = targetPosRef.current.z + (coords.z - targetPosRef.current.z) * frac;
-        setTargetPos({ x: subX, y: subY, z: subZ });
-        await new Promise((r) => setTimeout(r, 380 * (50 / speedOverride)));
+  const handleSimulateAlert = () => {
+    const samples = [
+      {
+        severity: 'SUCCESS',
+        title: 'Saved successfully',
+        message: '',
+        command_id: '',
+        type: 'ROBOT_SAVE',
+      },
+      {
+        severity: 'INFO',
+        title: 'Request in progress',
+        message: "We're processing your request. You'll be notified once it's done.",
+        command_id: '',
+        type: 'COMMAND_IN_PROGRESS',
+      },
+      {
+        severity: 'ERROR',
+        title: 'Something went wrong',
+        message: "We couldn't complete your request. Check your connection and try again.",
+        command_id: '',
+        type: 'ROBOT_ERROR',
+      },
+      {
+        severity: 'SUCCESS',
+        title: 'Robot Movement Completed',
+        message: 'A1 reached 30.00°',
+        command_id: 'CMD-000001',
+        type: 'COMMAND_COMPLETED',
+        payload: { duration: 1.2 }
+      },
+      {
+        severity: 'WARNING',
+        title: 'Robot Connection Unstable',
+        message: 'Communication with KUKA KR C5 is unstable.',
+        type: 'CONNECTION_WARNING',
+      },
+      {
+        severity: 'CRITICAL',
+        title: 'Robot Safety State Changed',
+        message: 'Live robot control has been disabled.',
+        type: 'SAFETY_STATE_CHANGED',
       }
-      return 150;
-    }
-
-    if (trimmed.startsWith('PTP') || trimmed.startsWith('LIN')) {
-      const coords = parseCoordinates(trimmed);
-      setTargetPos(coords);
-      return trimmed.startsWith('PTP') ? 1800 : 2200;
-    }
-
-    if (trimmed.startsWith('ARC_ON')) {
-      setIsWelding(true);
-      playWeldSound();
-      return 1200;
-    }
-
-    if (trimmed.startsWith('ARC_OFF')) {
-      setIsWelding(false);
-      stopWeldSound();
-      return 800;
-    }
-
-    if (trimmed.startsWith('WAIT SEC')) {
-      const secMatch = trimmed.match(/WAIT\s+SEC\s*(\d+(\.\d+)?)/i);
-      const secs = secMatch ? parseFloat(secMatch[1]) : 1.0;
-      return secs * 1000;
-    }
-
-    return 800;
-  };
-
-  const runKrlScript = async () => {
-    if (!isPoweredOn || isScriptRunning) return;
-    const lines = krlCode.split('\n');
-    setIsScriptRunning(true);
-    scriptExecutionRef.current = { isRunning: true, currentLine: 0, lines };
-
-    for (let i = 0; i < lines.length; i++) {
-      if (!scriptExecutionRef.current.isRunning || !isPoweredOn) break;
-      setCurrentScriptLine(i);
-      scriptExecutionRef.current.currentLine = i;
-      const delay = await executeKrlLine(lines[i]);
-      await new Promise((r) => setTimeout(r, delay * (50 / speedOverride)));
-    }
-
-    setIsScriptRunning(false);
-    scriptExecutionRef.current.isRunning = false;
-    addLog('[KRL-COMPLETE] KRL Program Execution Finished.');
-  };
-
-  const stopKrlScript = () => {
-    setIsScriptRunning(false);
-    scriptExecutionRef.current.isRunning = false;
-    setIsWelding(false);
-    stopWeldSound();
-    addLog('[KRL-HALT] KRL Program Aborted. Returning to Standby Home...');
-    setTargetPos(HOME_COORDS);
-  };
-
-  const stepKrlScript = async () => {
-    if (!isPoweredOn) return;
-    const lines = krlCode.split('\n');
-    let lineIdx = scriptExecutionRef.current.currentLine;
-    if (lineIdx >= lines.length) lineIdx = 0;
-
-    setCurrentScriptLine(lineIdx);
-    await executeKrlLine(lines[lineIdx]);
-    scriptExecutionRef.current.currentLine = (lineIdx + 1) % lines.length;
-  };
-
-  const loadKrlTemplate = (key) => {
-    if (WORKPIECE_SHAPES[key]) {
-      setSelectedShapeKey(key);
-      setKrlCode(WORKPIECE_SHAPES[key].krlCode);
-      addLog(`Loaded KRL Program Template: ${WORKPIECE_SHAPES[key].name}`);
-    }
-  };
-
-  // Dynamic Trajectory Sequencer (Calibrated Normal Speed)
-  useEffect(() => {
-    if (!isAutoCycle || !isPoweredOn) return;
-
-    const shape = WORKPIECE_SHAPES[selectedShapeKey] || WORKPIECE_SHAPES.circle_pipe;
-    const cycleSteps = shape.trajectory;
-
-    let idx = 0;
-    let timerId;
-
-    const runStep = () => {
-      if (!isAutoCycle || !isPoweredOn) return;
-      const step = cycleSteps[idx];
-      setAutoStepName(step.name);
-      setTargetPos({ x: step.x, y: step.y, z: step.z });
-      idx = (idx + 1) % cycleSteps.length;
-      timerId = setTimeout(runStep, step.delay * (50 / speedOverride));
+    ];
+    // Pick next sample sequentially or randomly
+    const idx = (window._kukaSimIndex = ((window._kukaSimIndex || 0) + 1) % samples.length);
+    const sample = samples[idx];
+    const notifItem = {
+      id: `notif-sim-${Date.now()}`,
+      event_id: `EVT-${Date.now()}`,
+      title: sample.title,
+      message: sample.message,
+      severity: sample.severity,
+      command_id: sample.command_id,
+      type: sample.type,
+      event: sample.type,
+      read: false,
+      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      payload: sample.payload,
     };
+    setNotifications((prev) => [notifItem, ...prev]);
+    setUnreadCount((c) => c + 1);
+    addToast(notifItem);
+  };
 
-    runStep();
-    return () => clearTimeout(timerId);
-  }, [isAutoCycle, isPoweredOn, selectedShapeKey, speedOverride]);
+  // Convert joint angles for ThreeViewport format { A1, A2, A3, A4, A5, A6 }
+  const viewportActualAngles = {
+    A1: actualJoints.a1 ?? 0,
+    A2: actualJoints.a2 ?? -30.6,
+    A3: actualJoints.a3 ?? 29.4,
+    A4: actualJoints.a4 ?? 0,
+    A5: actualJoints.a5 ?? 43.8,
+    A6: actualJoints.a6 ?? -112.5,
+  };
 
-  // Motion Interpolation & Kinematics Engine Loop (Fluid 60 FPS Normal Speed)
-  useEffect(() => {
-    let animId;
-
-    const updateMotion = () => {
-      animId = requestAnimationFrame(updateMotion);
-
-      setDispPos((curr) => {
-        const lerp = (0.07 * (speedOverride / 50)) * (isPoweredOn ? 1 : 0.05);
-        const dx = (targetPosRef.current.x - curr.x) * lerp;
-        const dy = (targetPosRef.current.y - curr.y) * lerp;
-        const dz = (targetPosRef.current.z - curr.z) * lerp;
-
-        const next = {
-          x: curr.x + dx,
-          y: curr.y + dy,
-          z: curr.z + dz
-        };
-
-        // Update Joint Angles via Kinematics
-        const sol = kinematics.solve(next.x, next.y, next.z);
-        setJointAngles(sol.angles);
-
-        // Check Seam Welding Zone Contact (Z <= 305mm on table at X=620)
-        const inWeldPlane = isPoweredOn && next.z <= 305;
-        const dxWp = next.x - 620;
-        const dyWp = next.y;
-        const distFromWpCenter = Math.sqrt(dxWp * dxWp + dyWp * dyWp);
-
-        const atSeam = inWeldPlane && distFromWpCenter <= 120;
-
-        if (atSeam !== isWelding) {
-          setIsWelding(atSeam);
-          if (atSeam) {
-            playWeldSound();
-          } else {
-            stopWeldSound();
-          }
-        }
-
-        return next;
-      });
-    };
-
-    updateMotion();
-    return () => cancelAnimationFrame(animId);
-  }, [speedOverride, isPoweredOn, isWelding, soundEnabled]);
+  const viewportTargetAngles = {
+    A1: targetJoints.a1 ?? 0,
+    A2: targetJoints.a2 ?? -30.6,
+    A3: targetJoints.a3 ?? 29.4,
+    A4: targetJoints.a4 ?? 0,
+    A5: targetJoints.a5 ?? 43.8,
+    A6: targetJoints.a6 ?? -112.5,
+  };
 
   return (
-    <div className="app-container">
-      {/* Top Header Bar */}
-      <header className="app-header">
-        <div className="brand-box">
-          <div className="brand-icon">K</div>
-          <div className="brand-title">
-            <span className="brand-kuka">KUKA</span>
-            <span>KR CYBERTECH WELD CELL</span>
-            <span className="brand-badge">3D DIGITAL TWIN</span>
+    <div className="kuka-app-root">
+      {/* Toast Stack (Top Right, Non-intrusive) */}
+      <ToastNotificationStack toasts={toasts} onDismiss={dismissToast} />
+
+      {/* Live Mode Safety Modal */}
+      <LiveSafetyModal
+        isOpen={isSafetyModalOpen}
+        onClose={() => setIsSafetyModalOpen(false)}
+        onConfirm={executeSendCommand}
+        robotId={robotId}
+        targetJoints={targetJoints}
+      />
+
+      {/* Top Industrial Header (Pure White Card / Subtle Slate Border) */}
+      <header className="kuka-header">
+        <div className="header-left">
+          <div className="brand-logo-badge">
+            <span className="brand-kuka-text">KUKA</span>
+            <span className="brand-sub-tag">KR C5 DIGITAL TWIN</span>
+          </div>
+
+          <div className="robot-select-group">
+            <label className="text-xs text-slate-500 font-medium">Unit:</label>
+            <select
+              value={robotId}
+              onChange={(e) => setRobotId(e.target.value)}
+              className="robot-select-input"
+            >
+              <option value="KUKA-01">KUKA-01 (KR QUANTEC)</option>
+              <option value="KUKA-02">KUKA-02 (Welding Cell B)</option>
+            </select>
+          </div>
+
+          <div className={`connection-pill ${wsConnected ? 'connected' : 'offline'}`}>
+            <span className="dot" />
+            <span>{wsConnected ? 'CONNECTED' : 'OFFLINE'}</span>
+          </div>
+
+          <div className={`drives-pill ${drivesEnergized ? 'energized' : 'deenergized'}`}>
+            <Zap size={13} />
+            <span>{drivesEnergized ? '400V DRIVES ON' : 'DRIVES OFF'}</span>
           </div>
         </div>
 
-        {/* Status Indicators */}
-        <div className="header-status-box">
+        <div className="header-right">
+          {/* Mode Switcher */}
+          <div className="mode-toggle-group">
+            <button
+              onClick={() => handleModeChange('SIMULATION')}
+              className={`mode-btn ${robotMode === 'SIMULATION' ? 'active' : ''}`}
+            >
+              SIMULATION
+            </button>
+            <button
+              onClick={() => handleModeChange('LIVE')}
+              className={`mode-btn live ${robotMode === 'LIVE' ? 'active' : ''}`}
+            >
+              LIVE ROBOT
+            </button>
+          </div>
+
+          {/* Sound Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="status-badge"
+            className="header-icon-btn"
+            title={soundEnabled ? 'Mute audio' : 'Unmute audio'}
           >
-            {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
-            <span>{soundEnabled ? 'SOUND: ON' : 'MUTED'}</span>
+            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
           </button>
 
-          <div className={`status-badge ${isPoweredOn ? 'online' : 'offline'}`}>
-            <Zap size={14} />
-            <span>{isPoweredOn ? '400V DRIVES: ENERGIZED' : 'DRIVES: LOCKED OUT'}</span>
-          </div>
+          {/* Notification Bell with Badge & Flyout Popover */}
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkRead={handleMarkNotifRead}
+            onMarkAllRead={handleMarkAllRead}
+            onDeleteNotification={handleDeleteNotification}
+            onSimulateAlert={handleSimulateAlert}
+            onOpenArchive={() => {
+              setActiveBottomTab('notifications');
+              fetchNotifications();
+            }}
+          />
 
-          <div className="status-badge active">
-            <Radio size={14} />
-            <span>KRC5 ONLINE</span>
-          </div>
+          {/* Emergency Stop Button */}
+          <button
+            onClick={drivesEnergized ? handleEmergencyStop : handleResetDrives}
+            className={`btn-header-estop ${!drivesEnergized ? 'reset' : ''}`}
+            title={drivesEnergized ? 'Emergency Stop (Clamp Brakes)' : 'Reset E-Stop Relay'}
+          >
+            <AlertOctagon size={16} />
+            <span>{drivesEnergized ? 'E-STOP' : 'RESET DRIVES'}</span>
+          </button>
         </div>
       </header>
 
-      {/* Main Split: 3D Viewport (Left) + Teach Pendant (Right) */}
-      <main className="app-main">
-        <div className="viewport-wrapper">
+      {/* Main Workspace Layout */}
+      <main className="main-viewport-grid">
+        {/* Left: 3D Digital Twin Simulation Viewport */}
+        <section className="viewport-column">
           <ThreeViewport
-            dispPos={dispPos}
-            isWelding={isWelding}
-            isPoweredOn={isPoweredOn}
-            selectedMetalKey={selectedMetalKey}
-            selectedShapeKey={selectedShapeKey}
-            speedOverride={speedOverride}
-            autoStepName={autoStepName}
+            jointAngles={viewportActualAngles}
+            targetJoints={viewportTargetAngles}
+            controlMode="JOINTS"
+            isPreviewActive={isPreviewActive}
+            robotStatus={robotStatus}
+            robotMode={robotMode}
+            commandId={activeCommandState?.command_id}
+            isPoweredOn={drivesEnergized}
+            isWelding={false}
+            selectedMetalKey="carbon_steel"
+            selectedShapeKey="circle_pipe"
+            speedOverride={50}
+            autoStepName="CLOSED-LOOP FEEDBACK"
             cameraPreset={cameraPreset}
             setCameraPreset={setCameraPreset}
           />
+        </section>
+
+        {/* Right: Joint Control & Command Center */}
+        <section className="control-column">
+          <JointControlPanel
+            targetJoints={targetJoints}
+            actualJoints={actualJoints}
+            onTargetChange={handleTargetChange}
+            onApplyPreset={handleApplyPreset}
+            onSyncWithRobot={handleSyncWithRobot}
+            onPreviewToggle={handlePreviewToggle}
+            isPreviewActive={isPreviewActive}
+            onSendCommand={handleSendCommandClick}
+            onEmergencyStop={handleEmergencyStop}
+            onResetDrives={handleResetDrives}
+            robotMode={robotMode}
+            robotStatus={robotStatus}
+            drivesEnergized={drivesEnergized}
+            activeCommandState={activeCommandState}
+          />
+        </section>
+      </main>
+
+      {/* Bottom Tabs Drawer: History, Notifications, Telemetry, Audit Logs */}
+      <section className="bottom-workspace-tabs">
+        <div className="tabs-header-bar">
+          <div className="tabs-nav-buttons">
+            <button
+              onClick={() => { setActiveBottomTab('history'); fetchCommandHistory(); }}
+              className={`tab-nav-item ${activeBottomTab === 'history' ? 'active' : ''}`}
+            >
+              <History size={14} />
+              Command History ({commandHistory.length})
+            </button>
+
+            <button
+              onClick={() => { setActiveBottomTab('notifications'); fetchNotifications(); }}
+              className={`tab-nav-item ${activeBottomTab === 'notifications' ? 'active' : ''}`}
+            >
+              <CheckCircle2 size={14} />
+              Notifications Archive ({notifications.length})
+            </button>
+
+            <button
+              onClick={() => setActiveBottomTab('telemetry')}
+              className={`tab-nav-item ${activeBottomTab === 'telemetry' ? 'active' : ''}`}
+            >
+              <Activity size={14} />
+              Verified Telemetry Stream
+            </button>
+
+            <button
+              onClick={() => { setActiveBottomTab('audit'); fetchAuditLogs(); }}
+              className={`tab-nav-item ${activeBottomTab === 'audit' ? 'active' : ''}`}
+            >
+              <Shield size={14} />
+              Audit Trail
+            </button>
+          </div>
         </div>
 
-        <TeachPendant
-          targetPos={targetPos}
-          setTargetPos={setTargetPos}
-          isPoweredOn={isPoweredOn}
-          isAutoCycle={isAutoCycle}
-          toggleAutoCycle={toggleAutoCycle}
-          triggerEstop={triggerEstop}
-          resetPowerOn={resetPowerOn}
-          selectedMetalKey={selectedMetalKey}
-          setSelectedMetalKey={setSelectedMetalKey}
-          selectedShapeKey={selectedShapeKey}
-          setSelectedShapeKey={setSelectedShapeKey}
-          speedOverride={speedOverride}
-          setSpeedOverride={setSpeedOverride}
-          jogStep={jogStep}
-          setJogStep={setJogStep}
-          onJog={handleJog}
-          onPreset={handlePreset}
-          jointAngles={jointAngles}
-          logs={logs}
-          clearLogs={() => setLogs([])}
-          krlCode={krlCode}
-          setKrlCode={setKrlCode}
-          isScriptRunning={isScriptRunning}
-          currentScriptLine={currentScriptLine}
-          runKrlScript={runKrlScript}
-          stopKrlScript={stopKrlScript}
-          stepKrlScript={stepKrlScript}
-          loadKrlTemplate={loadKrlTemplate}
-        />
-      </main>
+        <div className="tabs-content-area">
+          {activeBottomTab === 'history' && (
+            <CommandHistoryTable
+              commands={commandHistory}
+              onRefresh={fetchCommandHistory}
+              isLoading={isHistoryLoading}
+            />
+          )}
+
+          {activeBottomTab === 'notifications' && (
+            <NotificationsArchiveTable
+              notifications={notifications}
+              unreadCount={unreadCount}
+              onMarkRead={handleMarkNotifRead}
+              onMarkAllRead={handleMarkAllRead}
+              onDeleteNotification={handleDeleteNotification}
+              onRefresh={fetchNotifications}
+            />
+          )}
+
+          {activeBottomTab === 'telemetry' && (
+            <div className="telemetry-panel">
+              <div className="telemetry-summary-cards">
+                {['a1', 'a2', 'a3', 'a4', 'a5', 'a6'].map((ax) => {
+                  const act = actualJoints[ax] ?? 0.0;
+                  const tgt = targetJoints[ax] ?? 0.0;
+                  const err = Math.abs(act - tgt);
+                  return (
+                    <div key={ax} className="telemetry-stat-card">
+                      <div className="stat-card-title">{ax.toUpperCase()} Servomotor</div>
+                      <div className="stat-card-main-val font-mono">{act.toFixed(2)} deg</div>
+                      <div className="stat-card-sub text-xs text-slate-500">
+                        Target: {tgt.toFixed(2)} deg | Delta: {err.toFixed(3)} deg
+                      </div>
+                      <div className="telemetry-bar-bg">
+                        <div
+                          className="telemetry-bar-fill"
+                          style={{ width: `${Math.min(100, (Math.abs(act) / 185) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {activeBottomTab === 'audit' && (
+            <div className="audit-table-container">
+              <table className="kuka-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Resource Type</th>
+                    <th>Resource ID</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="table-empty">No audit records found.</td>
+                    </tr>
+                  ) : (
+                    auditLogs.map((log) => (
+                      <tr key={log.id}>
+                        <td className="text-xs text-slate-500 whitespace-nowrap">
+                          {log.timestamp ? new Date(log.timestamp).toLocaleString() : '-'}
+                        </td>
+                        <td className="font-mono text-xs font-semibold text-slate-800">{log.action}</td>
+                        <td className="text-xs text-slate-600">{log.resource_type}</td>
+                        <td className="text-xs font-mono text-slate-700">{log.resource_id || '-'}</td>
+                        <td className="text-xs text-slate-600 max-w-md truncate">
+                          {JSON.stringify(log.details)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
